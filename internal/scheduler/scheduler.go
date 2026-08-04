@@ -1,9 +1,24 @@
 package scheduler
 
 import (
+	"context"
 	"github.com/Simpleshaikh1/distributed_scheduler/internal/job"
+	"sync"
 	"time"
 )
+
+type Scheduler struct {
+	mu sync.Mutex
+
+	jobs map[string]*ScheduledJob
+
+	wakeup chan struct{}
+}
+
+type ScheduledJob struct {
+	Job       job.Job
+	NextRunAt time.Time
+}
 
 func DueExecutions(j job.Job, nextRunAt time.Time, now time.Time) []job.Execution {
 	var executions []job.Execution
