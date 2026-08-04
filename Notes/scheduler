@@ -1,0 +1,7 @@
+A scheduler manages three different concepts.
+A job- The persistent definition of what should happen.
+A Schedule- It answers when a job should produce an execution.
+An execution represents one specific attempt to execute a job.
+
+We provide an ID for every execution to make Idempotency easy.
+exec_id = job_id + scheduled_time
