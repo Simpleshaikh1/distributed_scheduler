@@ -16,3 +16,25 @@ func DueExecutions(j job.Job, nextRunAt time.Time, now time.Time) []job.Executio
 
 	return executions
 }
+
+type DueResult struct {
+	Executions []job.Execution
+	NextRunAt  time.Time
+}
+
+func CalculateDue(j job.Job, nextRunAt time.Time, now time.Time) DueResult {
+	result := DueResult{
+		NextRunAt: nextRunAt,
+	}
+
+	for !nextRunAt.After(now) {
+		result.Executions = append(result.Executions, job.NewExecution(
+			j.ID,
+			result.NextRunAt,
+		))
+
+		result.NextRunAt = result.NextRunAt.Add(j.Schedule.Interval)
+	}
+
+	return result
+}
