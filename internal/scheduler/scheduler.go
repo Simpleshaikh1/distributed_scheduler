@@ -60,3 +60,45 @@ func CalculateDue(j job.Job, nextRunAt time.Time, now time.Time) DueResult {
 
 	return result
 }
+
+func (s *Scheduler) Add(
+	j job.Job,
+	firstRunAt time.Time,
+) error {
+	if err := j.Validate(); err != nil {
+		return err
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.jobs[j.ID] = &ScheduledJob{
+		Job:       j,
+		NextRunAt: firstRunAt.UTC(),
+	}
+
+	s.signalWakeup()
+
+	return nil
+}
+
+func (s *Scheduler) Add(
+	j job.Job,
+	firstRunAt time.Time,
+) error {
+	if err := j.Validate(); err != nil {
+		return err
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.jobs[j.ID] = &ScheduledJob{
+		Job:       j,
+		NextRunAt: firstRunAt.UTC(),
+	}
+
+	s.signalWakeup()
+
+	return nil
+}
