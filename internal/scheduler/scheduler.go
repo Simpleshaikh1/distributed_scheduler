@@ -82,23 +82,28 @@ func (s *Scheduler) Add(
 	return nil
 }
 
-func (s *Scheduler) Add(
-	j job.Job,
-	firstRunAt time.Time,
-) error {
-	if err := j.Validate(); err != nil {
-		return err
-	}
-
+func (s *Scheduler) Remove(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.jobs[j.ID] = &ScheduledJob{
-		Job:       j,
-		NextRunAt: firstRunAt.UTC(),
-	}
+	delete(s.jobs, id)
 
 	s.signalWakeup()
+}
 
-	return nil
+func (s *Scheduler) nextRunAt() (time.Time, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var next time.Time
+	found := false
+
+	for _, scheduled := range s.jobs {
+		if !found || scheduled.NextRunAt.Before(next) {
+			next = scheduled.NextRunAt
+			found = true
+		}
+	}
+
+	return next, found
 }
