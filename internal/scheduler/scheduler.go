@@ -20,6 +20,13 @@ type ScheduledJob struct {
 	NextRunAt time.Time
 }
 
+func New() *Scheduler {
+	return &Scheduler{
+		jobs:   make(map[string]*ScheduledJob),
+		wakeup: make(chan struc{}, 1),
+	}
+}
+
 func DueExecutions(j job.Job, nextRunAt time.Time, now time.Time) []job.Execution {
 	var executions []job.Execution
 
