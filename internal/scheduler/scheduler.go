@@ -151,3 +151,22 @@ func (s *Scheduler) Run(ctx context.Context) error {
 		}
 	}
 }
+
+func (s *Scheduler) runDueJobs(now time.Time) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for _, scheduled := range s.jobs {
+		result := CalculateDue(
+			scheduled.Job,
+			scheduled.NextRunAt,
+			now,
+		)
+
+		scheduled.NextRunAt = result.NextRunAt
+
+		for _, execution := range result.Executions {
+			// dispatch later
+		}
+	}
+}
