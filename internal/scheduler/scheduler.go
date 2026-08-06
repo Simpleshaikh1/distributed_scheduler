@@ -107,3 +107,47 @@ func (s *Scheduler) nextRunAt() (time.Time, bool) {
 
 	return next, found
 }
+
+func (s *Scheduler) Run(ctx context.Context) error {
+	for {
+		nextRunAt, ok := s.nextRunAt()
+
+		if !ok {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+
+			case <-s.wakeup:
+				continue
+			}
+		}
+
+		delay := time.Until(nextRunAt)
+
+		if delay <= 0 {
+			s.runDueJobs(time.Now())
+			continue
+		}
+
+		timer := time.NewTimer(delay)
+
+		select {
+		case <-ctx.Done():
+			if !timer.Stop() {
+				<-timer.C
+			}
+
+			return ctx.Err()
+
+		case <-s.wakeup:
+			if !timer.Stop() {
+				<-timer.C
+			}
+
+			continue
+
+		case <-timer.C:
+			s.runDueJobs(time.Now())
+		}
+	}
+}
