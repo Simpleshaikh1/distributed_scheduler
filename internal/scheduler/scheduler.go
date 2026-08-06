@@ -90,3 +90,20 @@ func (s *Scheduler) Remove(id string) {
 
 	s.signalWakeup()
 }
+
+func (s *Scheduler) nextRunAt() (time.Time, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var next time.Time
+	found := false
+
+	for _, scheduled := range s.jobs {
+		if !found || scheduled.NextRunAt.Before(next) {
+			next = scheduled.NextRunAt
+			found = true
+		}
+	}
+
+	return next, found
+}
