@@ -170,3 +170,29 @@ func (s *Scheduler) runDueJobs(now time.Time) {
 		}
 	}
 }
+
+func (s *Scheduler) collectDue(
+	now time.Time,
+) []job.Execution {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var executions []job.Execution
+
+	for _, scheduled := range s.jobs {
+		result := CalculateDue(
+			scheduled.Job,
+			scheduled.NextRunAt,
+			now,
+		)
+
+		scheduled.NextRunAt = result.NextRunAt
+
+		executions = append(
+			executions,
+			result.Executions...,
+		)
+	}
+
+	return executions
+}
