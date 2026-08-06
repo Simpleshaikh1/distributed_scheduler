@@ -82,23 +82,11 @@ func (s *Scheduler) Add(
 	return nil
 }
 
-func (s *Scheduler) Add(
-	j job.Job,
-	firstRunAt time.Time,
-) error {
-	if err := j.Validate(); err != nil {
-		return err
-	}
-
+func (s *Scheduler) Remove(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.jobs[j.ID] = &ScheduledJob{
-		Job:       j,
-		NextRunAt: firstRunAt.UTC(),
-	}
+	delete(s.jobs, id)
 
 	s.signalWakeup()
-
-	return nil
 }
