@@ -196,3 +196,7 @@ func (s *Scheduler) collectDue(
 
 	return executions
 }
+
+type Pool struct {
+	worker []*Worker
+}
