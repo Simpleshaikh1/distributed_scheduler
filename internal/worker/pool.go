@@ -17,6 +17,13 @@ type Pool struct {
 	wg sync.WaitGroup
 }
 
+type Dispatch interface {
+	Dispatch(
+		context.Context,
+		job.Execution,
+	) error
+}
+
 func (p *Pool) Start(ctx context.Context) {
 	for i := 0; i < p.workers; i++ {
 		p.wg.Add(1)
@@ -28,5 +35,18 @@ func (p *Pool) Start(ctx context.Context) {
 		}
 
 		go worker.Run(ctx, &p.wg)
+	}
+}
+
+func (p *Pool) Dispatch(
+	ctx context.Context,
+	execution job.Execution,
+) error {
+	select {
+	case p.jobs <- execution:
+		return nil
+
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }

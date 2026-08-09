@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"github.com/Simpleshaikh1/distributed_scheduler/internal/job"
+	"sync"
 )
 
 type Worker struct {
@@ -13,7 +14,8 @@ type Worker struct {
 	executor Executor
 }
 
-func (w *Worker) Run(ctx context.Context) {
+func (w *Worker) Run(ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
 	for {
 		select {
 		case <-ctx.Done():
